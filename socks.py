@@ -1,34 +1,40 @@
 from pygame import *
-from random import randint
-from time import time as time
+import pygame
+from pygame.locals import *
+import time
+import random
 
-img_back = 'kimnata.jpg'
-img_hero = 'tazik.png'
-img_enemy = 'sock1.png'
 
-lost = 0
-score = 0
-max_lost = 5
-life = 5
-
-font.init()
-font1 = font.SysFont('Arial', 80)
-font2 = font.SysFont('Arial', 34)
-win = font1.render('Шкарпетки зібрано, мама пишається тобою', True, (255, 255, 255))
-lose = font1.render('Забагато втрачених шкарпеток', True, (255, 255, 255))
+clock = pygame.time.Clock()
+x=260
+y=500
+#Screen initialize
+pygame.init()
+pygame.font.init()
+screen=pygame.display.set_mode((600,600))
+pygame.display.set_caption("sock")
 
 class GameSprite(sprite.Sprite):
-    def init(self, player_image, player_x, player_y, size_x, size_y):
-        sprite.Sprite.init(self)
-        self.image = transform.sca;e(image.load(player_image),(size_x, size_y))
-        self.speed = player_x
+    def __init__(self, player_image,
+                player_x, player_y,
+                size_x, size_y,
+                player_speed):
+        sprite.Sprite.__init__(self)
+        self.image = transform.scale(
+            image.load(player_image), (
+                size_x, size_y
+            ))
+        self.speed = player_speed
         self.rect = self.image.get_rect()
         self.rect.x = player_x
         self.rect.y = player_y
+
     def reset(self):
         window.blit(self.image, (
             self.rect.x, self.rect.y
         ))
+
+
 class Player(GameSprite):
     def update(self):
         keys = key.get_pressed()
@@ -36,6 +42,12 @@ class Player(GameSprite):
             self.rect.x -= self.speed
         if keys[K_RIGHT] and self.rect.x < win_width - 80:
             self.rect.x += self.speed
+
+    def fire(self):
+        bullet = Bullet(img_bullet, self.rect.centerx,
+                        self.rect.top, 15, 20, -15)
+        bullets.add(bullet)
+
 
 class Enemy(GameSprite):
     def update(self):
@@ -46,56 +58,57 @@ class Enemy(GameSprite):
             self.rect.x = randint(80, win_width - 80)
             lost += 1
 
-win_width = 700
-win_height = 500
-display.set_caption("Shooter")
-window = display.set_mode((win_width, win_height))
-background = transform.scale(
-    image.load(img_back), (
-        win_width, win_height
-    )
-)
 
-ship = Player(img_hero, 5, win_height - 100, 80, 100, 10)
-monsters = sprite.Group()
-for i in range(1, 7):
-    monster = Enemy(img_enemy, randint(
-        80, win_width - 80), -40, 80, 50, randint(1, 5))
-    monsters.add(monster)
 
-finish = False
-game = True
+#Background
+kimnata=pygame.image.load("kimnata.jpg").convert_alpha()
+kimnata=pygame.transform.scale(kimnata,(600,600))
+screen.blit(kimnata,(0,0))
 
-while game:
-    for e in event.get():
-        if e.type == QUIT:
-            game = False
-        elif e.type == KEYDOWN:
-            if e.key == K_SPACE:
+#Basket
+tazik=pygame.image.load("tazik.png").convert_alpha()
+tazik=pygame.transform.scale(tazik,(80,80))
 
-                if not finish:
-                    window.blit(background, (0, 0))
-                    text = font2.render("Рахунок: " + str(score), 1, (255, 255, 255))
-                    window.blit(text, (10, 20))
-                    text_lost = font2.render("Пропущено: " + str(lost), 1, (255, 255, 255))
-                    window.blit(text_lost, (10, 50))
+#sock
+sock=pygame.image.load("sock1.png").convert_alpha()
+sock= pygame.transform.scale(sock,(60,60))
 
-        ship.update()
-        monsters.update()
-        asteroids.update()
-        bullets.update()
+#screen.blit(sock,(290,20))
+pygame.display.update()
 
-        ship.reset()
-        monsters.draw(window)
-        asteroids.draw(window)
-        bullets.draw(window)
-        if rel_time is True:
-            now_time = timer()
-            if now_time - last_time < 3:
-                reload = font2.render("Wait... reloading...", 1, (150, 0, 0))
-                window.blit(reload, (260, 460))
-            else:
-                num_fire = 0
-                rel_time = False
+#Movement of basket
+ychange=0
+xchange=0
+exiting=False
+
+
+xsock = random.randrange(50,550)
+ysock = 20
+while not exiting:
+    screen.blit(kimnata,(0,0))
+    if ysock<550:
+        ysock += 5
+        clock.tick(60)
+        screen.blit(sock,(xsock,ysock))
+
+    else:
+        ysock=20
+        xsock = random.randrange(50,550)
+        ysock=ysock+ychange
+        clock.tick(60)
+        screen.blit(sock,(xsock,ysock))
+
+    for event in pygame.event.get():
+        keys = key.get_pressed()
+        if keys[K_LEFT] and self.rect.x > 5:
+            self.rect.x -= self.speed
+        if keys[K_RIGHT] and self.rect.x < win_width - 80:
+            self.rect.x += self.speed
+
+        x=x+xchange
         
-        collides = sprite.groupcolli
+
+        screen.blit(tazik,(x,y))
+
+    pygame.display.update()
+    clock.tick(60)
