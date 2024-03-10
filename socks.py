@@ -77,6 +77,7 @@ pygame.display.update()
 exiting = False
 
 score = 0
+missed_sock = 0
 
 # Шрифт
 font = pygame.font.Font(None, 36)
@@ -96,62 +97,79 @@ sock_count = 0
 
 # Індекс поточного зображення шкарпетки
 current_sock_index = 0
+finish = False
 
 while not exiting:
-    screen.blit(kimnata, (0, 0))
-    
-    # Відображення таймера
-    elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
-    timer_text = font.render("Час: " + str(elapsed_time), True, (0, 0, 0))
-    screen.blit(timer_text, (10, 10))
-
-    # Відображення рахунку
-    score_text = font.render("Рахунок: " + str(score), True, (0, 0, 0))
-    screen.blit(score_text, (450, 10))
-
-    # Оновлення падаючих шкарпеток
-    for sock_data in falling_socks:
-        sock_data[1] += 5
-        screen.blit(socks_images[sock_data[2]], (sock_data[0], sock_data[1]))
-
-    # Створення нових шкарпеток з інтервалом 5 секунд
-    current_time = pygame.time.get_ticks()
-    if current_time - sock_spawn_time >= 3000:
-        xsock = random.randrange(50, 550)
-        ysock = 20
-        falling_socks.append([xsock, ysock, current_sock_index])
-        current_sock_index = (current_sock_index + 1) % len(socks_images)
-        sock_spawn_time = current_time
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
+    for e in pygame.event.get():
+        if e.type == QUIT:
             exiting = True
+   
+    if not finish:
+        screen.blit(kimnata, (0, 0))
+        # Відображення таймера
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
+        timer_text = font.render("Час: " + str(elapsed_time), True, (0, 0, 0))
+        screen.blit(timer_text, (10, 10))
 
-    keys = key.get_pressed()
-    if keys[K_LEFT] and tazik_rect.x > 5:
-        tazik_rect.x -= 5
-    if keys[K_RIGHT] and tazik_rect.x < 515:
-        tazik_rect.x += 5
+        # Відображення рахунку
+        score_text = font.render("Рахунок: " + str(score), True, (0, 0, 0))
+        screen.blit(score_text, (400, 10))
 
-    screen.blit(tazik, (tazik_rect.x, tazik_rect.y))
+        # Відображення пропущених
+        missed_text = font.render("Пропущено: " + str(missed_sock), True, (0, 0, 0))
+        screen.blit(missed_text, (400, 40))
 
-    # Перевірка колізії зі шкарпеткою та кошиком
-    for sock_data in falling_socks:
-        sock_rect = pygame.Rect(sock_data[0], sock_data[1], 60, 60)
-        if tazik_rect.colliderect(sock_rect):
-            if tuple(sock_data) not in collected_socks:
-                collected_socks.append(tuple(sock_data))
-                score += 1
-                falling_socks.remove(sock_data)
-                if score >= 10:
-                    win_message = font.render("Мама тобою пишається", True, (255, 255, 255))
-                    screen.blit(win_message, (150, 300))
-    
-    # Оновлення позиції падаючих шкарпеток та обробка телепортації
-    for sock_data in falling_socks:
-        if sock_data[1] > 600 or sock_data[0] < 0 or sock_data[0] > 600:
-            sock_data[1] = 0
-            sock_data[0] = random.randint(0, 600)
+        # Оновлення падаючих шкарпеток
+        for sock_data in falling_socks:
+            sock_data[1] += 3
+            screen.blit(socks_images[sock_data[2]], (sock_data[0], sock_data[1]))
+
+        # Створення нових шкарпеток з інтервалом 1секунд
+        current_time = pygame.time.get_ticks()
+        if current_time - sock_spawn_time >= 1000:
+            xsock = random.randrange(50, 550)
+            ysock = 20
+            falling_socks.append([xsock, ysock, current_sock_index])
+            current_sock_index = (current_sock_index + 1) % len(socks_images)
+            sock_spawn_time = current_time
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                exiting = True
+
+        keys = key.get_pressed()
+        if keys[K_LEFT] and tazik_rect.x > 5:
+            tazik_rect.x -= 5
+        if keys[K_RIGHT] and tazik_rect.x < 515:
+            tazik_rect.x += 5
+
+        screen.blit(tazik, (tazik_rect.x, tazik_rect.y))
+
+        # Перевірка колізії зі шкарпеткою та кошиком
+        for sock_data in falling_socks:
+            sock_rect = pygame.Rect(sock_data[0], sock_data[1], 60, 60)
+            if tazik_rect.colliderect(sock_rect):
+                if tuple(sock_data) not in collected_socks:
+                    collected_socks.append(tuple(sock_data))
+                    score += 1
+                    falling_socks.remove(sock_data)
+                    
+        
+        # Оновлення позиції падаючих шкарпеток та обробка телепортації
+        for sock_data in falling_socks:
+            if sock_data[1] > 600 or sock_data[0] < 0 or sock_data[0] > 600:
+                missed_sock += 1
+                sock_data[1] = 0
+                sock_data[0] = random.randint(0, 600)
+    if score >= 25:
+        win_message = font.render("Мама тобою пишається", False, (0, 0, 0))
+        screen.blit(win_message, (150, 300))
+        finish = True
+    if missed_sock > 10:
+        lose_message = font.render('Готуй гречку', False, (0, 0, 0))
+        screen.blit(lose_message, (150, 300))
+        finish = True
 
     pygame.display.update()
     clock.tick(60)
+
