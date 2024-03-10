@@ -42,12 +42,6 @@ class Player(GameSprite):
         if keys[K_RIGHT] and self.rect.x < 515:
             self.rect.x += self.speed
 
-    def fire(self):
-        bullet = Bullet(img_bullet, self.rect.centerx,
-                        self.rect.top, 15, 20, -15)
-        bullets.add(bullet)
-
-
 class Enemy(GameSprite):
     def update(self):
         self.rect.y += self.speed
@@ -71,7 +65,7 @@ tazik_rect.y = 500
 socks_images = [
     pygame.image.load("sock1.png").convert_alpha(),
     pygame.image.load("sock2.png").convert_alpha(),
-    pygame.image.load("sock3.png").convert_alpha()
+    pygame.image.load("sock4.png").convert_alpha()
 ]
 
 for i in range(len(socks_images)):
