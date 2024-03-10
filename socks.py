@@ -163,11 +163,11 @@ while not exiting:
                 sock_data[1] = 0
                 sock_data[0] = random.randint(0, 600)
     if score >= 25:
-        win_message = font1.render("Мама тобою пишається", False, (101, 188, 67), (154, 67, 188))
-        screen.blit(win_message, (150, 300))
+        win_message = font1.render("Мама тобою пишається", False, (0,0,0), (0, 200, 0))
+        screen.blit(win_message, (25, 300))
         finish = True
     if missed_sock > 10:
-        lose_message = font1.render('Готуй гречку', False, (101, 188, 67), (154, 67, 188))
+        lose_message = font1.render('Готуй гречку', False, (0,0,0), (200, 0, 0))
         screen.blit(lose_message, (150, 300))
         finish = True
 
